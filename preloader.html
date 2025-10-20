@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Preloader con Redirección</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #preloader {
+      background-color: #ffffff;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #preloader img {
+      width: 400px;
+      margin-bottom: 20px;
+    }
+
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .contenido {
+      display: none;
+      padding: 200px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Preloader -->
+  <div id="preloader">
+    <img src="img/IMG-20250930-WA0032.jpg" alt="Logo">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Contenido temporal (no se mostrará, se redirige antes) -->
+  <div class="contenido">
+    <h1>Redirigiendo...</h1>
+  </div>
+
+  <script>
+    // Espera 5 segundos y redirige a index.html
+    setTimeout(function () {
+      window.location.href = "index.html";
+    }, 5000); // 5000 milisegundos = 5 segundos
+  </script>
+
+</body>
+</html>

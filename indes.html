@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Empleados</title>
+  <style>
+    :root {
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa4b2; --accent:#3b82f6;
+      --success:#10b981; --danger:#ef4444; --warning:#f59e0b; --glass:rgba(255,255,255,0.03);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;
+      background:linear-gradient(180deg,#071028 0%, #071b2a 100%);
+      color:#e6eef6;
+      padding:20px;
+    }
+    .layout{
+      display:grid;
+      grid-template-columns:400px 1fr;
+      gap:20px;
+    }
+    .card{
+      background:rgba(255,255,255,0.02);
+      border-radius:10px;
+      padding:18px;
+      box-shadow:0 4px 18px rgba(0,0,0,0.4);
+    }
+    h2{margin:0 0 12px 0;}
+    label{font-size:13px;color:var(--muted);display:block;margin-top:8px;}
+    input,select,textarea{
+      width:100%;padding:8px 10px;border-radius:8px;
+      border:1px solid rgba(255,255,255,0.06);background:transparent;
+      color:#fff;font-family:inherit;
+    }
+    textarea{resize:vertical;min-height:70px}
+    .btn{
+      background:var(--accent);color:#fff;border:none;border-radius:8px;
+      padding:8px 12px;cursor:pointer;margin-top:10px;transition:opacity 0.2s;
+    }
+    .btn:hover{opacity:0.8;}
+    .table-wrap{overflow:auto;max-height:600px;}
+    table{width:100%;border-collapse:collapse;font-size:14px;}
+    th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);}
+    th{color:var(--muted);text-align:left;}
+    tr:hover{background:rgba(255,255,255,0.05);}
+    .department-group{margin-top:20px;}
+    .department-title{font-weight:600;font-size:15px;margin-bottom:6px;}
+    .modal{
+      display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
+      z-index:1000;align-items:center;justify-content:center;padding:20px;
+    }
+    .modal.active{display:flex;}
+    .modal-content{
+      background:rgba(255,255,255,0.05);border-radius:10px;
+      padding:20px;width:90%;max-width:600px;color:#e6eef6;
+      overflow-y:auto;max-height:90vh;
+    }
+    .modal-close{
+      background:none;border:none;color:#fff;font-size:22px;float:right;cursor:pointer;
+    }
+    .flex-row{display:flex;gap:10px;}
+    .photo-preview{
+      width:100%;max-width:140px;height:100px;
+      background:rgba(255,255,255,0.08);border-radius:8px;
+      display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);
+      overflow:hidden;
+    }
+    .photo-preview img{width:100%;height:100%;object-fit:cover;}
+    .img-small{width:150px;border-radius:6px;margin-right:10px;border:1px solid rgba(255,255,255,0.1);}
+    .cv-link{color:var(--accent);text-decoration:underline;cursor:pointer;}
+    @media(max-width:900px){
+      .layout{grid-template-columns:1fr;}
+    }
+    .delete-btn{background:#ef4444;padding:2px 6px;font-size:12px;border-radius:5px;cursor:pointer;color:#fff;}
+    .delete-btn:hover{background:#cc0000;}
+  </style>
+</head>
+<body>
+
+  <div class="layout">
+    <!-- FORMULARIO IZQUIERDA -->
+    <div class="card">
+      <h2>Agregar Empleado</h2>
+      <label>Nombre Completo</label>
+      <input id="empName" type="text" placeholder="Juan Pérez">
+
+      <label>Cédula</label>
+      <input id="empCedula" type="text" placeholder="1-1234-5678">
+
+      <label>Puesto</label>
+      <input id="empPosition" type="text" placeholder="Desarrollador">
+
+      <label>Departamento</label>
+      <input id="empDepartment" type="text" placeholder="Tecnología">
+
+      <div class="flex-row">
+        <div style="flex:1">
+          <label>Salario Base</label>
+          <input id="empSalary" type="number" placeholder="3000">
+        </div>
+        <div style="flex:1">
+          <label>Fecha de Ingreso</label>
+          <input id="empStartDate" type="date">
+        </div>
+      </div>
+
+      <label>Email</label>
+      <input id="empEmail" type="email" placeholder="correo@empresa.com">
+
+      <label>Teléfono</label>
+      <input id="empPhone" type="tel" placeholder="+506 8888-8888">
+
+      <label>Dirección</label>
+      <textarea id="empAddress" placeholder="Dirección del empleado..."></textarea>
+
+      <label>Tipo de Contrato</label>
+      <select id="empContract">
+        <option>Indefinido</option>
+        <option>Temporal</option>
+        <option>Por servicios profesionales</option>
+      </select>
+
+      <label>Estado</label>
+      <select id="empStatus">
+        <option value="active">Activo</option>
+        <option value="inactive">Inactivo</option>
+        <option value="vacation">Vacaciones</option>
+      </select>
+
+      <label>Foto Cédula (frente)</label>
+      <input id="empIdFront" type="file" accept="image/*" onchange="previewImage(this,'frontPreview')">
+      <div id="frontPreview" class="photo-preview">Sin imagen</div>
+
+      <label>Foto Cédula (reverso)</label>
+      <input id="empIdBack" type="file" accept="image/*" onchange="previewImage(this,'backPreview')">
+      <div id="backPreview" class="photo-preview">Sin imagen</div>
+
+      <label>Currículum (PDF)</label>
+      <input id="empCv" type="file" accept="application/pdf">
+
+      <label>Notas</label>
+      <textarea id="empNotes" placeholder="Información adicional..."></textarea>
+
+      <button class="btn" onclick="addEmployee()">Guardar Empleado</button>
+    </div>
+
+    <!-- TABLA DERECHA -->
+    <div class="card">
+      <h2>Empleados por Departamento</h2>
+      <div id="employeeTable" class="table-wrap"></div>
+    </div>
+  </div>
+
+  <!-- MODAL DETALLE EMPLEADO -->
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+      <h2>Detalles del Empleado</h2>
+      <div id="employeeDetails"></div>
+      <button class="delete-btn" id="deleteFromModalBtn" onclick="">Eliminar Empleado</button>
+    </div>
+  </div>
+
+<script>
+  let employees = JSON.parse(localStorage.getItem('employees') || '{}');
+  let currentDep = null, currentIndex = null;
+
+  function addEmployee(){
+    const name = empName.value.trim();
+    const dep = empDepartment.value.trim() || "Sin departamento";
+    if(!name){ alert("Ingrese el nombre del empleado."); return; }
+
+    const employee = {
+      name,
+      cedula: empCedula.value,
+      position: empPosition.value,
+      department: dep,
+      salary: empSalary.value,
+      startDate: empStartDate.value,
+      email: empEmail.value,
+      phone: empPhone.value,
+      address: empAddress.value,
+      contract: empContract.value,
+      status: empStatus.value,
+      notes: empNotes.value
+    };
+
+    const front = empIdFront.files[0];
+    const back = empIdBack.files[0];
+    const cv = empCv.files[0];
+
+    if(front){
+      const reader = new FileReader();
+      reader.onload = e => employee.frontImg = e.target.result;
+      reader.readAsDataURL(front);
+    }
+    if(back){
+      const reader = new FileReader();
+      reader.onload = e => employee.backImg = e.target.result;
+      reader.readAsDataURL(back);
+    }
+    if(cv){
+      const cvURL = URL.createObjectURL(cv);
+      employee.cvFile = cvURL;
+      employee.cvName = cv.name;
+    }
+
+    if(!employees[dep]) employees[dep] = [];
+    employees[dep].push(employee);
+    localStorage.setItem('employees', JSON.stringify(employees));
+    setTimeout(renderEmployees, 200);
+    clearForm();
+  }
+
+  function renderEmployees(){
+    const container = document.getElementById("employeeTable");
+    container.innerHTML = '';
+    for(const dep in employees){
+      const group = document.createElement("div");
+      group.className = "department-group";
+      group.innerHTML = `<div class="department-title">${dep}</div>
+        <table>
+          <thead><tr><th>Nombre</th><th>Puesto</th><th>Estado</th><th>Acción</th></tr></thead>
+          <tbody>
+          ${employees[dep].map((e,i)=>`
+            <tr>
+              <td onclick="showDetails('${dep}',${i})" style="cursor:pointer">${e.name}</td>
+              <td>${e.position}</td>
+              <td>${e.status}</td>
+              <td><button class="delete-btn" onclick="deleteEmployee('${dep}',${i})">Eliminar</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`;
+      container.appendChild(group);
+    }
+  }
+
+  function showDetails(dep,i){
+    const e = employees[dep][i];
+    currentDep = dep;
+    currentIndex = i;
+    let html = `
+      <p><b>Nombre:</b> ${e.name}</p>
+      <p><b>Cédula:</b> ${e.cedula}</p>
+      <p><b>Puesto:</b> ${e.position}</p>
+      <p><b>Departamento:</b> ${e.department}</p>
+      <p><b>Salario:</b> ${e.salary}</p>
+      <p><b>Fecha de Ingreso:</b> ${e.startDate}</p>
+      <p><b>Email:</b> ${e.email}</p>
+      <p><b>Teléfono:</b> ${e.phone}</p>
+      <p><b>Dirección:</b> ${e.address}</p>
+      <p><b>Contrato:</b> ${e.contract}</p>
+      <p><b>Estado:</b> ${e.status}</p>
+      <p><b>Notas:</b> ${e.notes}</p>
+    `;
+
+    if(e.frontImg || e.backImg){
+      html += `<p><b>Fotos de Cédula:</b></p><div style="display:flex;gap:10px;flex-wrap:wrap;">`;
+      if(e.frontImg) html += `<img class="img-small" src="${e.frontImg}" alt="Frente">`;
+      if(e.backImg) html += `<img class="img-small" src="${e.backImg}" alt="Reverso">`;
+      html += `</div>`;
+    }
+
+    if(e.cvFile){
+      html += `<p><b>Currículum:</b> <a class="cv-link" href="${e.cvFile}" target="_blank">${e.cvName || 'Ver PDF'}</a></p>`;
+    }
+
+    document.getElementById("employeeDetails").innerHTML = html;
+    document.getElementById("deleteFromModalBtn").onclick = ()=> deleteEmployee(dep,i);
+    openModal("detailModal");
+  }
+
+  function deleteEmployee(dep, index){
+    if(confirm("¿Desea eliminar este empleado?")){
+      employees[dep].splice(index,1);
+      if(employees[dep].length === 0) delete employees[dep];
+      localStorage.setItem('employees', JSON.stringify(employees));
+      renderEmployees();
+      closeModal("detailModal");
+    }
+  }
+
+  function openModal(id){ document.getElementById(id).classList.add("active"); }
+  function closeModal(id){ document.getElementById(id).classList.remove("active"); }
+
+  function clearForm(){
+    document.querySelectorAll("input, textarea, select").forEach(el=>{
+      if(el.type!=="button" && el.type!=="file") el.value="";
+    });
+    document.getElementById("frontPreview").innerHTML = "Sin imagen";
+    document.getElementById("backPreview").innerHTML = "Sin imagen";
+  }
+
+  function previewImage(input, id){
+    const file = input.files[0];
+    const div = document.getElementById(id);
+    if(file){
+      const reader = new FileReader();
+      reader.onload = e=>{
+        div.innerHTML = `<img src="${e.target.result}" alt="preview">`;
+      }
+      reader.readAsDataURL(file);
+    } else {
+      div.innerHTML = "Sin imagen";
+    }
+  }
+
+  renderEmployees(); // cargar al iniciar
+</script>
+
+</body>
+</html>
